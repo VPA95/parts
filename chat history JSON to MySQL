@@ -1,37 +1,52 @@
+"""
+Скрипт позволяет достать имена и ID пользователей из экспортированной в формате JSON переписки чата telegram и импортировать их в таблицу внутри БД MySQL с колонками user_id, user_name.
+Скрипт проходит циклом по истории переписки.
+Важно: для работы скрипта необходимо вручную убрать в файле общую информацию чата (история создания), оставив исключительно сообщения пользователей.
+"""
+
+
+#импортируем необходимые библиотеки (может требоваться предварительная установка pip install)
 import MySQLdb
 import json
 import requests
 import os
 
+#считываем JSON, получаем список кортежей DATA
 with open(r"filepath", encoding='utf8') as read_file:
     data = json.load(read_file)
 
+#убираем лишние символы для последующего чтения MySQL
+#выбираем значения from (от кого, username) и from_id (от кого, user_id) соответствующие строкам истории переписки в JSON
 users = {(m['from'], m['from_id']) for m in data if 'from' in m}
-users1 = ((str(users).replace("{", "").
+#очищаем users от лишних симоволов для использования в JSON
+users_converted = ((str(users).replace("{", "").
            replace(" ", "").
            replace("}", "").
            replace("'", " ").
            replace("(", " ").
            replace(")", " ")).split(","))
 
+#подключаемся к базе данных MySQL. Вводим: хост, user, пароль, имя БД и кодировку (необходимо для чтения emoji)
 db = MySQLdb.connect(host='localhost',
                      user='root',
-                     passwd='', #password
-                     db='', #database_name
-                     charset='utf8mb4') #необходимо для чтения emoji
-
+                     passwd='',
+                     db='',
+                     charset='utf8mb4')
+#создаем курсор
 cur = db.cursor()
 
 x = 0
 while x + 1 < len(users1):
-    # user = (((str(users1[x]+"'"+","+"'"+users1[x+1])).replace(" ", "")))
-    usertuple = tuple([str(users1[x]), (users1[x + 1])])
-    print(usertuple)
+    #usertuple - кортеж содержащий значения " 'user_id', 'user_name' " для insert'а в MySQL
+    usertuple = tuple([str(users_converted[x]), (users_converted[x + 1])])
+    print(usertuple) #не необходимо, выполняет роль progress bar при выполнении
     x += 2
 
     cursor = db.cursor()
-
+    #ON DUPLICATE KEY UPDATE user_id=user_id - необходимо для сохранения только уникальных имен пользователей и id
+    #без конструкции ON DUPLICATE KEY UPDATE user_id=user_id скрипт заполнит таблицу в соответствии с тем, сколько сообщений писал тот или иной пользователь
     sql = "INSERT INTO db_name.table_name(user_id, user_name) VALUES (%s, %s) ON DUPLICATE KEY UPDATE user_id=user_id"
+    #val - значения имени пользователи и его ID, которые будут подставляться в VALUES (%s, %s) по ходу цикла
     val = [
         usertuple
     ]
