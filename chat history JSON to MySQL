@@ -53,3 +53,5 @@ while x + 1 < len(users1):
 
     cursor.executemany(sql, val)
     db.commit()
+
+#комменты оставил бы, а так всё норм:)
