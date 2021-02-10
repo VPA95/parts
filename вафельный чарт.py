@@ -9,17 +9,13 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches # needed for waffle Charts
 
-def waffle_maker(df, x, y):
+def create_waffle_chart(df, height, width, colormap):
 
 
     # compute the proportion of each category with respect to the total
     total_values = sum(df[df.columns[0]])
     category_proportions = [(float(value) / total_values) for value in df[df.columns[0]]]
 
-    
-    
-    width = x # width of chart
-    height = y # height of chart
 
     total_num_tiles = width * height # total number of tiles
 
@@ -57,7 +53,7 @@ def waffle_maker(df, x, y):
     fig = plt.figure()
 
     # use matshow to display the waffle chart
-    colormap = plt.cm.coolwarm
+    colormap = colormap
     plt.matshow(waffle_chart, cmap=colormap)
     plt.colorbar()
 
