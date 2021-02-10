@@ -5,6 +5,10 @@ y - chart's heigt
 legend: default none
 """
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches # needed for waffle Charts
+
 def waffle_maker(df, x, y):
 
 
