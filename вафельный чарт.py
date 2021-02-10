@@ -1,9 +1,16 @@
-def waffle_maker(df_x, x, y, legend):
+"""
+df - one-column dataframe to be processed
+x - chart's width
+y - chart's heigt
+legend: default none
+"""
+
+def waffle_maker(df, x, y):
 
 
     # compute the proportion of each category with respect to the total
-    total_values = sum(df_x[df_x.columns[0]])
-    category_proportions = [(float(value) / total_values) for value in df_x[df_x.columns[0]]]
+    total_values = sum(df[df.columns[0]])
+    category_proportions = [(float(value) / total_values) for value in df[df.columns[0]]]
 
     
     
@@ -64,23 +71,23 @@ def waffle_maker(df_x, x, y, legend):
     plt.yticks([])
 
     # compute cumulative sum of individual categories to match color schemes between chart and legend
-    values_cumsum = np.cumsum(df_x[df_x.columns[0]])
+    values_cumsum = np.cumsum(df[df.columns[0]])
     total_values = values_cumsum[len(values_cumsum) - 1]
 
     # create legend
     legend_handles = []
-    for i, category in enumerate(df_x.index.values):
-        label_str = category + ' (' + str(df_x[df_x.columns[0]][i]) + ')'
+    for i, category in enumerate(df.index.values):
+        label_str = category + ' (' + str(df[df.columns[0]][i]) + ')'
         color_val = colormap(float(values_cumsum[i])/total_values)
         legend_handles.append(mpatches.Patch(color=color_val, label=label_str))
     
 
     
-    if str(legend) == 'True':
-        # add legend to chart
-        plt.legend(handles=legend_handles,
-                   loc='upper left', 
-                   ncol=1,
-                   bbox_to_anchor=(0., -0.5, 0.95, .1),
-                   fontsize = 'medium'
-                  )
+    
+    # add legend to chart
+    plt.legend(handles=legend_handles,
+               loc='upper left', 
+               ncol=1,
+               bbox_to_anchor=(0., -0.5, 0.95, .1),
+               fontsize = 'medium'
+              )
